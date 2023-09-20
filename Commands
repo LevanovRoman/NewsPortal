@@ -1,0 +1,74 @@
+from mainapp.models import *
+from django.db.models import Sum
+
+#1
+us1 = User.objects.create_user('Mike')
+us2 = User.objects.create_user('John')
+
+#2
+a1 = Author.objects.create(user=us1)
+a2 = Author.objects.create(user=us2)
+
+#3
+cat1 = Category.objects.create(name='Театр')
+cat2 = Category.objects.create(name='Мода')
+cat3 = Category.objects.create(name='Погода')
+cat4 = Category.objects.create(name='Кино')
+
+#4
+text1 = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consequatur consequuntur corporis'
+text2 = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium, aliquid architecto aut blanditiis excepturiiste laborum laudantium maxime mollitia natus nemo qui rerum saepe, sed soluta '
+text3 = 'Consectetur culpa cum, cupiditate distinctio est et harum illo illum in molestias odit omnis pariatur quasi quisunt voluptas voluptate. A animi consequatur delectus esse nihil omnis possimus rem repell. Consectetur culpa cum, cupiditate distinctio est et harum illo illum in molestias odit omnis pariatur quasi quisunt voluptas voluptate. A animi consequatur delectus esse nihil omnis possimus rem repell'
+
+p1 = Post.objects.create(author=a2, type='St', title='Lorem ipsum dolor sit amet', text=text1)
+p2 = Post.objects.create(author=a1, type='St', title='Consequatur consequuntur', text=text2)
+p3 = Post.objects.create(author=a1, type='Nv', title='necessitatibus numquam recusandae ', text=text3)
+
+#5
+p1.category.set([cat1, cat2, cat3])
+p2.category.set([cat1, cat2])
+p3.category.add(cat4)
+
+#6
+com1 = Comment.objects.create(post=p1, user=us1, text='A aliquam aperiam cum eum eveniet excepturi facilis illo')
+com2 = Comment.objects.create(post=p2, user=us2, text='A animi consequatur delectus esse nihil omnis')
+com3 = Comment.objects.create(post=p3, user=us1, text='Aliquid architecto aut autem cumque dolores ipsam')
+com4 = Comment.objects.create(post=p1, user=us2, text='A adipisci alias atque ea eum, facilis, ipsam mollitia')
+
+#7
+p1.like(); p1.like(); p1.like(); p1.like(); p1.like(); p1.like(); p1.dislike();
+p1.like(); p1.like(); p1.like(); p1.dislike();
+p3.like(); p3.like(); p3.like(); p3.like();
+com1.like(); com1.like(); com1.like(); com1.dislike();
+com2.like(); com2.like(); com2.like();
+com3.like(); com3.like();
+com4.like();
+p1.save(); p2.save(); p3.save(); com1.save(); com2.save(); com3.save(); com4.save();
+
+#8
+a1.update_rating()
+a2.update_rating()
+a1.save(); a2.save()
+
+#9
+best = Author.objects.order_by('rating').last()
+best.user.username
+best.rating
+
+#10
+bf = Post.objects.values('time_created', 'author__user__username', 'title', 'rating').order_by('rating').last()
+for k, v in bf.items():
+    print(f"{k} - {v}")
+
+bp = Post.objects.order_by('rating').last()
+bp.preview()
+
+#11
+allcom = bp.post_comment.all()
+
+for i in allcom:
+    print('Комментарий:')
+    print('time_creation', i.time_created)
+    print('user', i.user.username)
+    print('text', i.text)
+    print('rating', i.rating)
